@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-outfit text-slate-800 bg-slate-50;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-xl transition-all duration-200 font-medium flex items-center justify-center gap-2;
+  }
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700 shadow-lg shadow-primary-500/20 active:scale-95;
+  }
+  .btn-secondary {
+    @apply bg-secondary-500 text-white hover:bg-secondary-600 shadow-lg shadow-secondary-500/20 active:scale-95;
+  }
+  .btn-ghost {
+    @apply hover:bg-slate-100 text-slate-600 active:scale-95;
+  }
+  .card {
+    @apply bg-white rounded-2xl shadow-soft border border-slate-100 p-4 transition-all duration-300 hover:shadow-xl;
+  }
+}
+
+/* Leaflet Overrides */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  @apply rounded-3xl overflow-hidden shadow-soft;
+}
+
+.custom-marker {
+  @apply transition-transform duration-300 hover:scale-110;
+}
+
+.leaflet-popup-content-wrapper {
+  @apply rounded-2xl shadow-xl overflow-hidden p-0;
+}
+
+.leaflet-popup-content {
+  @apply m-0 rounded-2xl;
+}
+
+.leaflet-bar {
+  @apply border-none shadow-soft rounded-xl overflow-hidden !m-4;
+}
+
+.leaflet-bar a {
+  @apply !bg-white !text-slate-600 hover:!bg-slate-50 !border-slate-100;
+}
