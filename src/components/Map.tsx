@@ -38,15 +38,25 @@ const MapController = () => {
     const { selectedSector, selectedStall } = useStore();
 
     useEffect(() => {
-        if (selectedSector && selectedSector.geojson?.geometry?.coordinates?.[0]) {
-            const coords = selectedSector.geojson.geometry.coordinates[0];
-            const lats = coords.map((c: any) => c[1]);
-            const lngs = coords.map((c: any) => c[0]);
-            const center: [number, number] = [
-                (Math.min(...lats) + Math.max(...lats)) / 2,
-                (Math.min(...lngs) + Math.max(...lngs)) / 2
-            ];
-            map.flyTo(center, 16, { animate: true, duration: 1.5 });
+        if (selectedSector && selectedSector.geojson?.geometry?.coordinates) {
+            const { type, coordinates } = selectedSector.geojson.geometry;
+            let coords: [number, number][] = [];
+
+            if (type === 'Polygon') {
+                coords = coordinates[0];
+            } else if (type === 'LineString') {
+                coords = coordinates;
+            }
+
+            if (coords.length > 0) {
+                const lats = coords.map((c: any) => c[1]);
+                const lngs = coords.map((c: any) => c[0]);
+                const center: [number, number] = [
+                    (Math.min(...lats) + Math.max(...lats)) / 2,
+                    (Math.min(...lngs) + Math.max(...lngs)) / 2
+                ];
+                map.flyTo(center, 18, { animate: true, duration: 1.5 });
+            }
         }
     }, [selectedSector, map]);
 
