@@ -19,8 +19,15 @@ function App() {
   }, []);
 
   const fetchData = async () => {
-    const { data: sectorsData } = await supabase.from('sectors').select('*');
-    const { data: stallsData } = await supabase.from('stalls').select('*');
+    console.log("Iniciando descarga de datos de Supabase...");
+    const { data: sectorsData, error: sError } = await supabase.from('sectors').select('*');
+    const { data: stallsData, error: stError } = await supabase.from('stalls').select('*');
+
+    if (sError) console.error("Error cargando sectores:", sError);
+    if (stError) console.error("Error cargando puestos:", stError);
+
+    console.log("Sectores recibidos:", sectorsData?.length || 0);
+    console.log("Puestos recibidos:", stallsData?.length || 0);
 
     if (sectorsData) setSectors(sectorsData);
     if (stallsData) setStalls(stallsData);
