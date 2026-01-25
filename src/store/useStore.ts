@@ -17,6 +17,9 @@ interface AppState {
     isSidebarOpen: boolean;
     setSidebarOpen: (isOpen: boolean) => void;
 
+    isDrawingMode: boolean;
+    setDrawingMode: (isDrawing: boolean) => void;
+
     userLocation: [number, number] | null;
     setUserLocation: (location: [number, number] | null) => void;
 }
@@ -36,6 +39,9 @@ export const useStore = create<AppState>((set) => ({
 
     isSidebarOpen: false,
     setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
+
+    isDrawingMode: false,
+    setDrawingMode: (isDrawing) => set({ isDrawingMode: isDrawing }),
 
     userLocation: null,
     setUserLocation: (location) => set({ userLocation: location }),

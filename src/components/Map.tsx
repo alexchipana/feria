@@ -1,6 +1,8 @@
 import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import '@geoman-io/leaflet-geoman-free';
+import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import { useStore } from '../store/useStore';
 import type { Stall, Sector } from '../types';
 import { Navigation } from 'lucide-react';
@@ -20,9 +22,70 @@ interface MapProps {
     sectors: Sector[];
     isAdmin?: boolean;
     onLocationSelect?: (lat: number, lng: number) => void;
+    onGeometryCreate?: (geometry: any) => void;
 }
 
-// Component to handle map clicks for admin
+// Drawing Tool Component
+const DrawingTool = ({ onGeometryCreate }: { onGeometryCreate?: (geometry: any) => void }) => {
+    const map = useMap();
+    const { isDrawingMode } = useStore();
+
+    useEffect(() => {
+        if (!map) return;
+
+        // @ts-ignore
+        map.pm.addControls({
+            position: 'topleft',
+            drawCircle: false,
+            drawMarker: false,
+            drawCircleMarker: false,
+            drawRectangle: false,
+            drawText: false,
+            cutPolygon: false,
+            rotateMode: false,
+            dragMode: true,
+            editMode: true,
+            removalMode: true,
+        });
+
+        // @ts-ignore
+        map.pm.setLang('es');
+
+        const handleCreate = (e: any) => {
+            const layer = e.layer;
+            const geojson = layer.toGeoJSON();
+            if (onGeometryCreate) {
+                onGeometryCreate(geojson);
+            }
+            // We don't remove it so the user sees what they drew until save
+        };
+
+        // @ts-ignore
+        map.on('pm:create', handleCreate);
+
+        return () => {
+            // @ts-ignore
+            map.off('pm:create', handleCreate);
+            // @ts-ignore
+            map.pm.removeControls();
+        };
+    }, [map, onGeometryCreate]);
+
+    useEffect(() => {
+        // @ts-ignore
+        if (isDrawingMode) {
+            // @ts-ignore
+            map.pm.addControls();
+        } else {
+            // @ts-ignore
+            map.pm.removeControls();
+        }
+    }, [isDrawingMode, map]);
+
+    return null;
+};
+
+// Component to handle map clicks for admin (marker placement)
 const LocationPicker = ({ onSelect }: { onSelect: (lat: number, lng: number) => void }) => {
     useMapEvents({
         click(e) {
@@ -84,7 +147,7 @@ const UserLocationMarker = () => {
     return <Marker position={userLocation} icon={icon} />;
 };
 
-export const Map = ({ stalls, sectors, isAdmin, onLocationSelect }: MapProps) => {
+export const Map = ({ stalls, sectors, isAdmin, onLocationSelect, onGeometryCreate }: MapProps) => {
     const { setSelectedStall } = useStore();
     const center: [number, number] = [-16.502, -68.189];
 
@@ -102,6 +165,7 @@ export const Map = ({ stalls, sectors, isAdmin, onLocationSelect }: MapProps) =>
                 />
 
                 <MapController />
+                <DrawingTool onGeometryCreate={onGeometryCreate} />
 
                 {/* Sectors */}
                 {sectors.map((sector) => {
