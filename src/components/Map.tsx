@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup, Polygon, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useStore } from '../store/useStore';
@@ -38,15 +38,25 @@ const MapController = () => {
     const { selectedSector, selectedStall } = useStore();
 
     useEffect(() => {
-        if (selectedSector && selectedSector.geojson?.geometry?.coordinates?.[0]) {
-            const coords = selectedSector.geojson.geometry.coordinates[0];
-            const lats = coords.map((c: any) => c[1]);
-            const lngs = coords.map((c: any) => c[0]);
-            const center: [number, number] = [
-                (Math.min(...lats) + Math.max(...lats)) / 2,
-                (Math.min(...lngs) + Math.max(...lngs)) / 2
-            ];
-            map.flyTo(center, 16, { animate: true, duration: 1.5 });
+        if (selectedSector && selectedSector.geojson?.geometry?.coordinates) {
+            const geometry = selectedSector.geojson.geometry;
+            let coords = [];
+
+            if (geometry.type === 'Polygon') {
+                coords = geometry.coordinates[0];
+            } else if (geometry.type === 'LineString') {
+                coords = geometry.coordinates;
+            }
+
+            if (coords.length > 0) {
+                const lats = coords.map((c: any) => c[1]);
+                const lngs = coords.map((c: any) => c[0]);
+                const center: [number, number] = [
+                    (Math.min(...lats) + Math.max(...lats)) / 2,
+                    (Math.min(...lngs) + Math.max(...lngs)) / 2
+                ];
+                map.flyTo(center, 17, { animate: true, duration: 1.5 });
+            }
         }
     }, [selectedSector, map]);
 
@@ -94,20 +104,42 @@ export const Map = ({ stalls, sectors, isAdmin, onLocationSelect }: MapProps) =>
                 <MapController />
 
                 {/* Sectors */}
-                {sectors.map((sector) => (
-                    <Polygon
-                        key={sector.id}
-                        positions={sector.geojson.geometry.coordinates[0].map((coord: any) => [coord[1], coord[0]])}
-                        pathOptions={{
-                            fillColor: sector.color,
-                            fillOpacity: 0.3,
-                            color: sector.color,
-                            weight: 2,
-                        }}
-                    >
-                        <Popup>{sector.name}</Popup>
-                    </Polygon>
-                ))}
+                {sectors.map((sector) => {
+                    const geometry = sector.geojson?.geometry;
+                    if (!geometry) return null;
+
+                    if (geometry.type === 'Polygon') {
+                        return (
+                            <Polygon
+                                key={sector.id}
+                                positions={geometry.coordinates[0].map((coord: any) => [coord[1], coord[0]])}
+                                pathOptions={{
+                                    fillColor: sector.color,
+                                    fillOpacity: 0.3,
+                                    color: sector.color,
+                                    weight: 2,
+                                }}
+                            >
+                                <Popup>{sector.name}</Popup>
+                            </Polygon>
+                        );
+                    } else if (geometry.type === 'LineString') {
+                        return (
+                            <Polyline
+                                key={sector.id}
+                                positions={geometry.coordinates.map((coord: any) => [coord[1], coord[0]])}
+                                pathOptions={{
+                                    color: sector.color,
+                                    weight: 5,
+                                    opacity: 0.8
+                                }}
+                            >
+                                <Popup>{sector.name}</Popup>
+                            </Polyline>
+                        );
+                    }
+                    return null;
+                })}
 
                 {/* Stalls */}
                 {stalls.map((stall) => (
