@@ -1,8 +1,6 @@
 import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import '@geoman-io/leaflet-geoman-free';
-import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import { useStore } from '../store/useStore';
 import type { Stall, Sector } from '../types';
 import { Navigation } from 'lucide-react';
@@ -22,70 +20,9 @@ interface MapProps {
     sectors: Sector[];
     isAdmin?: boolean;
     onLocationSelect?: (lat: number, lng: number) => void;
-    onGeometryCreate?: (geometry: any) => void;
 }
 
-// Drawing Tool Component
-const DrawingTool = ({ onGeometryCreate }: { onGeometryCreate?: (geometry: any) => void }) => {
-    const map = useMap();
-    const { isDrawingMode } = useStore();
-
-    useEffect(() => {
-        if (!map) return;
-
-        // @ts-ignore
-        const pm = (map as any).pm;
-        pm.addControls({
-            position: 'topleft',
-            drawCircle: false,
-            drawMarker: false,
-            drawCircleMarker: false,
-            drawRectangle: false,
-            drawText: false,
-            cutPolygon: false,
-            rotateMode: false,
-            dragMode: true,
-            editMode: true,
-            removalMode: true,
-        });
-
-        pm.setLang('es');
-
-        const handleCreate = (e: any) => {
-            const layer = e.layer;
-            const geojson = layer.toGeoJSON();
-            if (onGeometryCreate) {
-                onGeometryCreate(geojson);
-            }
-        };
-
-        map.on('pm:create' as any, handleCreate);
-
-        return () => {
-            // Clean up all drawn layers when leaving mode
-            map.eachLayer((layer: any) => {
-                if (layer.pm && layer.pm._drawn) {
-                    map.removeLayer(layer);
-                }
-            });
-            map.off('pm:create' as any, handleCreate);
-            pm.removeControls();
-        };
-    }, [map, onGeometryCreate]);
-
-    useEffect(() => {
-        const pm = (map as any).pm;
-        if (isDrawingMode) {
-            pm.addControls();
-        } else {
-            pm.removeControls();
-        }
-    }, [isDrawingMode, map]);
-
-    return null;
-};
-
-// Component to handle map clicks for admin (marker placement)
+// Component to handle map clicks for admin
 const LocationPicker = ({ onSelect }: { onSelect: (lat: number, lng: number) => void }) => {
     useMapEvents({
         click(e) {
@@ -101,25 +38,15 @@ const MapController = () => {
     const { selectedSector, selectedStall } = useStore();
 
     useEffect(() => {
-        if (selectedSector && selectedSector.geojson?.geometry?.coordinates) {
-            const geometry = selectedSector.geojson.geometry;
-            let coords = [];
-
-            if (geometry.type === 'Polygon') {
-                coords = geometry.coordinates[0];
-            } else if (geometry.type === 'LineString') {
-                coords = geometry.coordinates;
-            }
-
-            if (coords.length > 0) {
-                const lats = coords.map((c: any) => c[1]);
-                const lngs = coords.map((c: any) => c[0]);
-                const center: [number, number] = [
-                    (Math.min(...lats) + Math.max(...lats)) / 2,
-                    (Math.min(...lngs) + Math.max(...lngs)) / 2
-                ];
-                map.flyTo(center, 17, { animate: true, duration: 1.5 });
-            }
+        if (selectedSector && selectedSector.geojson?.geometry?.coordinates?.[0]) {
+            const coords = selectedSector.geojson.geometry.coordinates[0];
+            const lats = coords.map((c: any) => c[1]);
+            const lngs = coords.map((c: any) => c[0]);
+            const center: [number, number] = [
+                (Math.min(...lats) + Math.max(...lats)) / 2,
+                (Math.min(...lngs) + Math.max(...lngs)) / 2
+            ];
+            map.flyTo(center, 16, { animate: true, duration: 1.5 });
         }
     }, [selectedSector, map]);
 
@@ -147,7 +74,7 @@ const UserLocationMarker = () => {
     return <Marker position={userLocation} icon={icon} />;
 };
 
-export const Map = ({ stalls, sectors, isAdmin, onLocationSelect, onGeometryCreate }: MapProps) => {
+export const Map = ({ stalls, sectors, isAdmin, onLocationSelect }: MapProps) => {
     const { setSelectedStall } = useStore();
     const center: [number, number] = [-16.502, -68.189];
 
@@ -160,26 +87,24 @@ export const Map = ({ stalls, sectors, isAdmin, onLocationSelect, onGeometryCrea
                 zoomControl={false}
             >
                 <TileLayer
-                    attribution='&copy; contributors'
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
                 <MapController />
-                <DrawingTool onGeometryCreate={onGeometryCreate} />
 
                 {/* Sectors */}
                 {sectors.map((sector) => {
-                    const geojson = sector.geojson as any;
-                    if (!geojson) return null;
+                    if (!sector.geojson?.geometry?.coordinates) return null;
 
-                    const geometry = geojson.geometry || geojson;
-                    if (!geometry || !geometry.type) return null;
+                    const type = sector.geojson.geometry.type;
+                    const coords = sector.geojson.geometry.coordinates;
 
-                    if (geometry.type === 'Polygon') {
+                    if (type === 'Polygon') {
                         return (
                             <Polygon
                                 key={sector.id}
-                                positions={geometry.coordinates[0].map((coord: any) => [coord[1], coord[0]])}
+                                positions={coords[0].map((coord: any) => [coord[1], coord[0]])}
                                 pathOptions={{
                                     fillColor: sector.color,
                                     fillOpacity: 0.3,
@@ -190,21 +115,24 @@ export const Map = ({ stalls, sectors, isAdmin, onLocationSelect, onGeometryCrea
                                 <Popup>{sector.name}</Popup>
                             </Polygon>
                         );
-                    } else if (geometry.type === 'LineString') {
+                    }
+
+                    if (type === 'LineString') {
                         return (
                             <Polyline
                                 key={sector.id}
-                                positions={geometry.coordinates.map((coord: any) => [coord[1], coord[0]])}
+                                positions={coords.map((coord: any) => [coord[1], coord[0]])}
                                 pathOptions={{
                                     color: sector.color,
-                                    weight: 5,
-                                    opacity: 0.8
+                                    weight: 4,
+                                    opacity: 1
                                 }}
                             >
                                 <Popup>{sector.name}</Popup>
                             </Polyline>
                         );
                     }
+
                     return null;
                 })}
 
