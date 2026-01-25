@@ -1,6 +1,6 @@
 import { useStore } from '../store/useStore';
 import type { Stall, Sector } from '../types';
-import { LayoutGrid, Info, X } from 'lucide-react';
+import { LayoutGrid, X } from 'lucide-react';
 
 interface SidebarProps {
     stalls: Stall[];
@@ -85,23 +85,6 @@ export const Sidebar = ({ sectors }: SidebarProps) => {
                     </div>
                 </div>
 
-                {/* Visual Aid Area */}
-                <div className="p-6 mt-auto">
-                    <div className="p-6 bg-[#f0f4ff] rounded-[2.5rem] border border-primary-100 flex flex-col gap-3 relative overflow-hidden group">
-                        {/* Background decoration */}
-                        <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-primary-100/50 rounded-full blur-2xl group-hover:bg-primary-200/50 transition-colors" />
-
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
-                                <Info className="w-4 h-4 text-primary-600" />
-                            </div>
-                            <span className="text-xs font-black text-[#1e293b] uppercase tracking-tighter">Ayuda Visual</span>
-                        </div>
-                        <p className="text-[11px] text-primary-700/80 font-semibold leading-relaxed relative z-10 px-1">
-                            Los polígonos de colores en el mapa indican los sectores especializados de la feria.
-                        </p>
-                    </div>
-                </div>
             </div>
         </div>
     );
