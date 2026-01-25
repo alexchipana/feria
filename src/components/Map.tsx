@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup, Polygon, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polygon, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useStore } from '../store/useStore';
@@ -19,7 +19,18 @@ interface MapProps {
     stalls: Stall[];
     sectors: Sector[];
     isAdmin?: boolean;
+    onLocationSelect?: (lat: number, lng: number) => void;
 }
+
+// Component to handle map clicks for admin
+const LocationPicker = ({ onSelect }: { onSelect: (lat: number, lng: number) => void }) => {
+    useMapEvents({
+        click(e) {
+            onSelect(e.latlng.lat, e.latlng.lng);
+        },
+    });
+    return null;
+};
 
 // Controller to handle map zooming and movement
 const MapController = () => {
@@ -29,7 +40,6 @@ const MapController = () => {
     useEffect(() => {
         if (selectedSector && selectedSector.geojson?.geometry?.coordinates?.[0]) {
             const coords = selectedSector.geojson.geometry.coordinates[0];
-            // Get center of polygon
             const lats = coords.map((c: any) => c[1]);
             const lngs = coords.map((c: any) => c[0]);
             const center: [number, number] = [
@@ -64,7 +74,7 @@ const UserLocationMarker = () => {
     return <Marker position={userLocation} icon={icon} />;
 };
 
-export const Map = ({ stalls, sectors }: MapProps) => {
+export const Map = ({ stalls, sectors, isAdmin, onLocationSelect }: MapProps) => {
     const { setSelectedStall } = useStore();
     const center: [number, number] = [-16.502, -68.189];
 
@@ -131,6 +141,10 @@ export const Map = ({ stalls, sectors }: MapProps) => {
                 ))}
 
                 <UserLocationMarker />
+
+                {isAdmin && onLocationSelect && (
+                    <LocationPicker onSelect={onLocationSelect} />
+                )}
             </MapContainer>
 
             {/* Floating Controls */}

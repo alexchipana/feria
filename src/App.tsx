@@ -6,7 +6,7 @@ import { Sidebar } from './components/Sidebar';
 import { Map } from './components/Map';
 import { StallModal } from './components/StallModal';
 import { Admin } from './pages/Admin';
-import { Map as MapIcon, LayoutGrid, Settings, Menu, Plus, MapPin, Search } from 'lucide-react';
+import { Map as MapIcon, LayoutGrid, Settings, Menu, MapPin as MapPinIcon, Search } from 'lucide-react';
 
 function App() {
   const [view, setView] = useState<'home' | 'admin'>('home');
@@ -110,7 +110,7 @@ function App() {
                       <img src={stall.image_url} alt={stall.name} className="w-full h-44 rounded-xl object-cover mb-4" />
                     ) : (
                       <div className="w-full h-44 rounded-xl bg-slate-50 flex items-center justify-center text-slate-200 mb-4">
-                        <MapPin className="w-12 h-12" />
+                        <MapPinIcon className="w-12 h-12" />
                       </div>
                     )}
                     <div>
