@@ -1,11 +1,12 @@
-import { MapContainer, TileLayer, Marker, Popup, Polygon, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polygon, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useStore } from '../store/useStore';
 import type { Stall, Sector } from '../types';
 import { Navigation } from 'lucide-react';
+import { useEffect } from 'react';
 
-// Fix for default marker icon in leaflet
+// Fix for default marker icon
 // @ts-ignore
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -18,20 +19,36 @@ interface MapProps {
     stalls: Stall[];
     sectors: Sector[];
     isAdmin?: boolean;
-    onLocationSelect?: (lat: number, lng: number) => void;
 }
 
-// Component to handle map clicks for admin
-const LocationPicker = ({ onSelect }: { onSelect: (lat: number, lng: number) => void }) => {
-    useMapEvents({
-        click(e) {
-            onSelect(e.latlng.lat, e.latlng.lng);
-        },
-    });
+// Controller to handle map zooming and movement
+const MapController = () => {
+    const map = useMap();
+    const { selectedSector, selectedStall } = useStore();
+
+    useEffect(() => {
+        if (selectedSector && selectedSector.geojson?.geometry?.coordinates?.[0]) {
+            const coords = selectedSector.geojson.geometry.coordinates[0];
+            // Get center of polygon
+            const lats = coords.map((c: any) => c[1]);
+            const lngs = coords.map((c: any) => c[0]);
+            const center: [number, number] = [
+                (Math.min(...lats) + Math.max(...lats)) / 2,
+                (Math.min(...lngs) + Math.max(...lngs)) / 2
+            ];
+            map.flyTo(center, 16, { animate: true, duration: 1.5 });
+        }
+    }, [selectedSector, map]);
+
+    useEffect(() => {
+        if (selectedStall) {
+            map.flyTo([selectedStall.lat, selectedStall.lng], 18, { animate: true, duration: 1.5 });
+        }
+    }, [selectedStall, map]);
+
     return null;
 };
 
-// Component to handle user location pulse
 const UserLocationMarker = () => {
     const { userLocation } = useStore();
     if (!userLocation) return null;
@@ -47,9 +64,9 @@ const UserLocationMarker = () => {
     return <Marker position={userLocation} icon={icon} />;
 };
 
-export const Map = ({ stalls, sectors, isAdmin, onLocationSelect }: MapProps) => {
+export const Map = ({ stalls, sectors }: MapProps) => {
     const { setSelectedStall } = useStore();
-    const center: [number, number] = [-16.502, -68.189]; // Approximate center of 16 de Julio Fair
+    const center: [number, number] = [-16.502, -68.189];
 
     return (
         <div className="relative w-full h-full">
@@ -64,6 +81,8 @@ export const Map = ({ stalls, sectors, isAdmin, onLocationSelect }: MapProps) =>
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
+                <MapController />
+
                 {/* Sectors */}
                 {sectors.map((sector) => (
                     <Polygon
@@ -74,9 +93,6 @@ export const Map = ({ stalls, sectors, isAdmin, onLocationSelect }: MapProps) =>
                             fillOpacity: 0.3,
                             color: sector.color,
                             weight: 2,
-                        }}
-                        eventHandlers={{
-                            click: () => console.log('Sector clicked:', sector.name),
                         }}
                     >
                         <Popup>{sector.name}</Popup>
@@ -115,10 +131,6 @@ export const Map = ({ stalls, sectors, isAdmin, onLocationSelect }: MapProps) =>
                 ))}
 
                 <UserLocationMarker />
-
-                {isAdmin && onLocationSelect && (
-                    <LocationPicker onSelect={onLocationSelect} />
-                )}
             </MapContainer>
 
             {/* Floating Controls */}
