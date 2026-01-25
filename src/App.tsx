@@ -77,6 +77,9 @@ function App() {
                 {/* View Toggle and Map/Directory */}
                 <div className="flex-1 relative flex flex-col px-6 lg:px-8 py-4">
                     <div className="mb-4 flex items-center gap-2 z-10">
+                        <h2 className="hidden lg:block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mr-6">
+                            MAPA DE LA FERIA 16 DE JULIO
+                        </h2>
                         <div className="inline-flex bg-white p-1 rounded-2xl shadow-soft border border-slate-100">
                             <button
                                 onClick={() => setActiveTab('map')}
