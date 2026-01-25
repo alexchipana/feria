@@ -23,6 +23,7 @@ function App() {
     const { data: sectorsData } = await supabase.from('sectors').select('*');
     const { data: stallsData } = await supabase.from('stalls').select('*');
     if (sectorsData) setSectors(sectorsData);
+    if (stallsData) setSectors(stallsData); // Wait, I found another small fix in sectors vs stalls
     if (stallsData) setStalls(stallsData);
   };
 
@@ -45,12 +46,9 @@ function App() {
 
   return (
     <div className="h-[100dvh] flex flex-col lg:flex-row bg-slate-50 overflow-hidden font-outfit">
-      {/* Sidebar - Visible on PC, Toggleable on Mobile */}
       <Sidebar stalls={stalls} sectors={sectors} />
 
-      {/* Main Content Area */}
       <main className="flex-1 relative flex flex-col overflow-hidden">
-        {/* Top Header with Search Bar */}
         <header className="bg-white border-b border-slate-100 px-6 lg:px-12 py-4 flex items-center justify-between gap-6 z-20">
           <div className="lg:hidden flex items-center gap-2">
             <button onClick={() => setSidebarOpen(true)} className="p-2 text-slate-500">
@@ -70,13 +68,12 @@ function App() {
           </div>
 
           <div className="w-10 lg:w-32 flex justify-end">
-            {/* Profile icon or space as in screenshot */}
+            {/* Profile icon space */}
           </div>
         </header>
 
-        {/* View Toggle and Map/Directory */}
         <div className="flex-1 relative flex flex-col px-6 lg:px-8 py-4">
-          <div className="mb-4 flex items-center gap-2 z-10">
+          <div className="mb-4 flex items-center justify-between gap-2 z-10">
             <div className="inline-flex bg-white p-1 rounded-2xl shadow-soft border border-slate-100">
               <button
                 onClick={() => setActiveTab('map')}
@@ -93,15 +90,17 @@ function App() {
                 Directorio
               </button>
             </div>
+            <h2 className="hidden lg:block text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">
+              MAPA DE FERIA 16 DE JULIO - Directorio Digital
+            </h2>
+            <div className="lg:w-32"></div>
           </div>
 
           <div className="flex-1 relative rounded-3xl overflow-hidden shadow-soft border border-slate-100">
-            {/* Map View */}
             <div className={`absolute inset-0 transition-opacity duration-300 ${activeTab === 'map' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
               <Map stalls={stalls} sectors={sectors} />
             </div>
 
-            {/* Directory View */}
             <div className={`absolute inset-0 bg-white overflow-y-auto p-6 lg:p-8 transition-opacity duration-300 ${activeTab === 'directory' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {stalls.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase())).map(stall => (
@@ -124,10 +123,9 @@ function App() {
           </div>
         </div>
 
-        {/* Floating Admin Button */}
         <button
           onClick={() => setView('admin')}
-          className="absolute bottom-10 right-10 z-[1000] w-14 h-14 bg-white rounded-2xl shadow-xl border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary-600 transition-all hover:scale-110 active:scale-95 shadow-primary-500/10"
+          className="absolute bottom-10 right-10 z-[1000] w-14 h-14 bg-white rounded-2xl shadow-xl border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary-600 transition-all hover:scale-110 active:scale-95"
           title="Administración"
         >
           <Settings className="w-6 h-6" />
