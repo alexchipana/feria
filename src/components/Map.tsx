@@ -86,13 +86,13 @@ const UserLocationMarker = () => {
 
 export const Map = ({ stalls, sectors, isAdmin, onLocationSelect }: MapProps) => {
     const { setSelectedStall } = useStore();
-    const center: [number, number] = [-16.502, -68.189];
+    const center: [number, number] = [-16.496, -68.185];
 
     return (
         <div className="relative w-full h-full">
             <MapContainer
                 center={center}
-                zoom={15}
+                zoom={16}
                 className="w-full h-full z-0"
                 zoomControl={false}
             >
