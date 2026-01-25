@@ -34,7 +34,8 @@ const DrawingTool = ({ onGeometryCreate }: { onGeometryCreate?: (geometry: any) 
         if (!map) return;
 
         // @ts-ignore
-        map.pm.addControls({
+        const pm = (map as any).pm;
+        pm.addControls({
             position: 'topleft',
             drawCircle: false,
             drawMarker: false,
@@ -48,8 +49,7 @@ const DrawingTool = ({ onGeometryCreate }: { onGeometryCreate?: (geometry: any) 
             removalMode: true,
         });
 
-        // @ts-ignore
-        map.pm.setLang('es');
+        pm.setLang('es');
 
         const handleCreate = (e: any) => {
             const layer = e.layer;
@@ -57,28 +57,28 @@ const DrawingTool = ({ onGeometryCreate }: { onGeometryCreate?: (geometry: any) 
             if (onGeometryCreate) {
                 onGeometryCreate(geojson);
             }
-            // We don't remove it so the user sees what they drew until save
         };
 
-        // @ts-ignore
-        map.on('pm:create', handleCreate);
+        map.on('pm:create' as any, handleCreate);
 
         return () => {
-            // @ts-ignore
-            map.off('pm:create', handleCreate);
-            // @ts-ignore
-            map.pm.removeControls();
+            // Clean up all drawn layers when leaving mode
+            map.eachLayer((layer: any) => {
+                if (layer.pm && layer.pm._drawn) {
+                    map.removeLayer(layer);
+                }
+            });
+            map.off('pm:create' as any, handleCreate);
+            pm.removeControls();
         };
     }, [map, onGeometryCreate]);
 
     useEffect(() => {
-        // @ts-ignore
+        const pm = (map as any).pm;
         if (isDrawingMode) {
-            // @ts-ignore
-            map.pm.addControls();
+            pm.addControls();
         } else {
-            // @ts-ignore
-            map.pm.removeControls();
+            pm.removeControls();
         }
     }, [isDrawingMode, map]);
 
@@ -160,7 +160,7 @@ export const Map = ({ stalls, sectors, isAdmin, onLocationSelect, onGeometryCrea
                 zoomControl={false}
             >
                 <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    attribution='&copy; contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
@@ -169,8 +169,11 @@ export const Map = ({ stalls, sectors, isAdmin, onLocationSelect, onGeometryCrea
 
                 {/* Sectors */}
                 {sectors.map((sector) => {
-                    const geometry = sector.geojson?.geometry;
-                    if (!geometry) return null;
+                    const geojson = sector.geojson as any;
+                    if (!geojson) return null;
+
+                    const geometry = geojson.geometry || geojson;
+                    if (!geometry || !geometry.type) return null;
 
                     if (geometry.type === 'Polygon') {
                         return (
