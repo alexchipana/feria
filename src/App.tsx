@@ -5,12 +5,11 @@ import { useStore } from './store/useStore';
 import { Sidebar } from './components/Sidebar';
 import { Map } from './components/Map';
 import { StallModal } from './components/StallModal';
-import { Admin } from './pages/Admin';
 import { Map as MapIcon, LayoutGrid, Settings, Menu, MapPin as MapPinIcon, Search } from 'lucide-react';
+import { Admin } from './pages/Admin';
 
 function App() {
     const [view, setView] = useState<'home' | 'admin'>('home');
-    const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
     const [activeTab, setActiveTab] = useState<'map' | 'directory'>('map');
     const [sectors, setSectors] = useState<Sector[]>([]);
     const [stalls, setStalls] = useState<Stall[]>([]);
@@ -28,62 +27,11 @@ function App() {
     };
 
     if (view === 'admin') {
-        if (!isAdminAuthenticated) {
-            return (
-                <div className="h-screen flex items-center justify-center bg-slate-900 px-6">
-                    <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-2xl border border-slate-100">
-                        <div className="flex flex-col items-center text-center mb-8">
-                            <div className="w-16 h-16 bg-primary-50 rounded-2xl flex items-center justify-center mb-4">
-                                <Settings className="w-8 h-8 text-primary-600" />
-                            </div>
-                            <h2 className="text-2xl font-bold text-slate-900">Acceso Privado</h2>
-                            <p className="text-slate-500 mt-2">Ingresa la clave maestra para continuar</p>
-                        </div>
-                        <form
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                const password = (e.currentTarget.elements.namedItem('password') as HTMLInputElement).value;
-                                if (password === 'feria16') {
-                                    setIsAdminAuthenticated(true);
-                                } else {
-                                    alert('Clave incorrecta');
-                                }
-                            }}
-                            className="space-y-6"
-                        >
-                            <input
-                                name="password"
-                                type="password"
-                                placeholder="Clave de acceso"
-                                autoFocus
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary-500 transition-all outline-none text-center text-xl tracking-widest font-bold"
-                            />
-                            <div className="flex flex-col gap-3">
-                                <button type="submit" className="w-full btn btn-primary py-4">
-                                    Desbloquear
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setView('home')}
-                                    className="w-full text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors"
-                                >
-                                    Cancelar y volver
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            );
-        }
-
         return (
             <div className="h-screen flex flex-col">
                 <div className="absolute top-4 left-4 z-[3000]">
                     <button
-                        onClick={() => {
-                            setView('home');
-                            setIsAdminAuthenticated(false);
-                        }}
+                        onClick={() => setView('home')}
                         className="btn bg-white shadow-xl border border-slate-100 flex items-center gap-2"
                     >
                         <MapIcon className="w-5 h-5 text-primary-600" />

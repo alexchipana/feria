@@ -1,0 +1,158 @@
+[
+  {
+    "code": "A",
+    "name": "Ropa Americana 1ra",
+    "category": "Ropa",
+    "color": "#3498db"
+  },
+  {
+    "code": "B",
+    "name": "Zapatos Americanos 1ra",
+    "category": "Calzado",
+    "color": "#f1c40f"
+  },
+  {
+    "code": "C",
+    "name": "Ollas y otros (Amazon)",
+    "category": "Hogar",
+    "color": "#27ae60"
+  },
+  {
+    "code": "D",
+    "name": "Juguetes Americanos",
+    "category": "Juguetes",
+    "color": "#e74c3c"
+  },
+  {
+    "code": "E",
+    "name": "Peluches americanos",
+    "category": "Juguetes",
+    "color": "#9b59b6"
+  },
+  {
+    "code": "F",
+    "name": "Visuteria y Cosmeticos",
+    "category": "Belleza",
+    "color": "#ff69b4"
+  },
+  {
+    "code": "G",
+    "name": "Sabenas Americanas",
+    "category": "Hogar",
+    "color": "#f39c12"
+  },
+  {
+    "code": "H",
+    "name": "Mochilas Americanas",
+    "category": "Accesorios",
+    "color": "#d35400"
+  },
+  {
+    "code": "I",
+    "name": "Gymnasio Americanos",
+    "category": "Deporte",
+    "color": "#16a085"
+  },
+  {
+    "code": "J",
+    "name": "Autos",
+    "category": "Vehículos",
+    "color": "#7f8c8d"
+  },
+  {
+    "code": "K",
+    "name": "Motocicletas",
+    "category": "Vehículos",
+    "color": "#2c3e50"
+  },
+  {
+    "code": "L",
+    "name": "Auto partes 1ra / Llantas",
+    "category": "Repuestos",
+    "color": "#34495e"
+  },
+  {
+    "code": "M",
+    "name": "Moto partes",
+    "category": "Repuestos",
+    "color": "#95a5a6"
+  },
+  {
+    "code": "N",
+    "name": "Ropa Nueva",
+    "category": "Ropa",
+    "color": "#2980b9"
+  },
+  {
+    "code": "O",
+    "name": "Zapatos Nuevos",
+    "category": "Calzado",
+    "color": "#e67e22"
+  },
+  {
+    "code": "P",
+    "name": "Peluquerias",
+    "category": "Servicios",
+    "color": "#8e44ad"
+  },
+  {
+    "code": "Q",
+    "name": "Abarrotes",
+    "category": "Alimentos",
+    "color": "#f1c40f"
+  },
+  {
+    "code": "R",
+    "name": "Vestidos de novias, Tortas",
+    "category": "Eventos",
+    "color": "#e91e63"
+  },
+  {
+    "code": "S",
+    "name": "Bicicletas",
+    "category": "Vehículos",
+    "color": "#1abc9c"
+  },
+  {
+    "code": "T",
+    "name": "Cortinas",
+    "category": "Hogar",
+    "color": "#f1c40f"
+  },
+  {
+    "code": "U",
+    "name": "Celulares",
+    "category": "Electrónica",
+    "color": "#3f51b5"
+  },
+  {
+    "code": "V",
+    "name": "Lana y Ropa Artesanal",
+    "category": "Ropa",
+    "color": "#795548"
+  },
+  {
+    "code": "W",
+    "name": "Medicina Natural",
+    "category": "Salud",
+    "color": "#4caf50"
+  },
+  {
+    "code": "X",
+    "name": "Mascotas",
+    "category": "Animales",
+    "color": "#ff9800"
+  },
+  {
+    "code": "Y",
+    "name": "Plantas",
+    "category": "Naturaleza",
+    "color": "#4caf50"
+  },
+  {
+    "code": "Z",
+    "name": "Muebles",
+    "category": "Hogar",
+    "color": "#795548"
+  }
+]

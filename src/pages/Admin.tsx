@@ -2,35 +2,17 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { supabase } from '../lib/supabase';
 import { Map } from '../components/Map';
-import { Save, Plus, X, Upload, MapPin, Layers, MousePointer2, Type } from 'lucide-react';
-import type { Stall, Sector } from '../types';
-import { useEffect } from 'react';
+import { Save, Plus, X, Upload, MapPin } from 'lucide-react';
+import type { Stall } from '../types';
 
 export const Admin = () => {
-    const [activeSection, setActiveSection] = useState<'stalls' | 'sectors'>('stalls');
     const [isAdding, setIsAdding] = useState(false);
-    const [isTracing, setIsTracing] = useState(false);
-    const [tracingOpacity, setTracingOpacity] = useState(0.5);
-    const [sectorName, setSectorName] = useState('');
-    const [sectorColor, setSectorColor] = useState('#3b82f6');
     const [selectedCoords, setSelectedCoords] = useState<{ lat: number, lng: number } | null>(null);
     const [uploading, setUploading] = useState(false);
     const { register, handleSubmit, reset, setValue } = useForm();
-    const [stalls, setStalls] = useState<Stall[]>([]);
-    const [sectors, setSectors] = useState<Sector[]>([]);
+    const [stalls] = useState<Stall[]>([]);
 
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    const fetchData = async () => {
-        const { data: sectorsData } = await supabase.from('sectors').select('*');
-        const { data: stallsData } = await supabase.from('stalls').select('*');
-        if (sectorsData) setSectors(sectorsData);
-        if (stallsData) setStalls(stallsData);
-    };
-
-    const onSubmitStall = async (data: any) => {
+    const onSubmit = async (data: any) => {
         if (!selectedCoords) {
             alert("Por favor selecciona una ubicación en el mapa");
             return;
@@ -51,31 +33,6 @@ export const Admin = () => {
             setIsAdding(false);
             reset();
             setSelectedCoords(null);
-            fetchData();
-        }
-    };
-
-    const onSectorCreate = async (geojson: any) => {
-        if (!sectorName) {
-            alert("Por favor ingresa un nombre para el sector antes de dibujar");
-            return;
-        }
-
-        const { error } = await supabase.from('sectors').insert([{
-            name: sectorName,
-            color: sectorColor,
-            geojson: geojson
-        }]);
-
-        if (error) {
-            console.error(error);
-            alert("Error al guardar el sector");
-        } else {
-            alert(`Sector "${sectorName}" guardado con éxito`);
-            setSectorName('');
-            // Refresh sectors
-            const { data } = await supabase.from('sectors').select('*');
-            if (data) setSectors(data);
         }
     };
 
@@ -111,95 +68,25 @@ export const Admin = () => {
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col">
             <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
-                <div className="flex items-center gap-8">
-                    <h1 className="text-xl font-bold text-slate-900">Panel de Administración</h1>
-                    <nav className="flex bg-slate-100 p-1 rounded-xl">
-                        <button
-                            onClick={() => setActiveSection('stalls')}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeSection === 'stalls' ? 'bg-white text-primary-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                        >
-                            <MapPin className="w-4 h-4" />
-                            Puestos
-                        </button>
-                        <button
-                            onClick={() => setActiveSection('sectors')}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeSection === 'sectors' ? 'bg-white text-primary-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                        >
-                            <Layers className="w-4 h-4" />
-                            Sectores
-                        </button>
-                    </nav>
-                </div>
-                {activeSection === 'stalls' ? (
-                    <button
-                        onClick={() => setIsAdding(true)}
-                        className="btn btn-primary"
-                    >
-                        <Plus className="w-5 h-5" />
-                        Nuevo Puesto
-                    </button>
-                ) : (
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
-                            <Type className="w-4 h-4 text-slate-400" />
-                            <input
-                                type="text"
-                                placeholder="Nombre del sector..."
-                                value={sectorName}
-                                onChange={(e) => setSectorName(e.target.value)}
-                                className="bg-transparent border-none outline-none text-sm font-medium w-40"
-                            />
-                            <input
-                                type="color"
-                                value={sectorColor}
-                                onChange={(e) => setSectorColor(e.target.value)}
-                                className="w-6 h-6 rounded-md cursor-pointer border-none"
-                            />
-                        </div>
-                        <button
-                            onClick={() => setIsTracing(!isTracing)}
-                            className={`btn ${isTracing ? 'bg-amber-100 text-amber-700 border-amber-200' : 'btn-secondary'}`}
-                        >
-                            <MousePointer2 className="w-5 h-5" />
-                            {isTracing ? 'Finalizar Calco' : 'Calcar Sectores'}
-                        </button>
-                    </div>
-                )}
+                <h1 className="text-xl font-bold text-slate-900">Panel de Administración</h1>
+                <button
+                    onClick={() => setIsAdding(true)}
+                    className="btn btn-primary"
+                >
+                    <Plus className="w-5 h-5" />
+                    Nuevo Puesto
+                </button>
             </header>
 
             <div className="flex-1 flex overflow-hidden">
                 <div className="flex-1 relative">
                     <Map
                         stalls={stalls}
-                        sectors={sectors}
-                        isAdmin={activeSection === 'stalls' && isAdding}
-                        isTracing={activeSection === 'sectors' && isTracing}
-                        tracingOpacity={tracingOpacity}
-                        onSectorCreate={onSectorCreate}
+                        sectors={[]}
+                        isAdmin={isAdding}
                         onLocationSelect={(lat, lng) => setSelectedCoords({ lat, lng })}
                     />
-                    {isTracing && (
-                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] px-6 py-4 bg-white/90 backdrop-blur rounded-3xl shadow-2xl border border-slate-100 flex flex-col gap-3 min-w-[300px]">
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Mesa de Luz (Calco)</span>
-                                <span className="text-xs font-bold text-primary-600">{Math.round(tracingOpacity * 100)}%</span>
-                            </div>
-                            <input
-                                type="range"
-                                min="0"
-                                max="1"
-                                step="0.01"
-                                value={tracingOpacity}
-                                onChange={(e) => setTracingOpacity(parseFloat(e.target.value))}
-                                className="w-full accent-primary-600"
-                            />
-                            <p className="text-[10px] text-slate-500 text-center leading-tight">
-                                Usa las herramientas de la izquierda para dibujar.<br />
-                                Se guardará automáticamente al terminar cada forma.
-                            </p>
-                        </div>
-                    )}
-                    {activeSection === 'stalls' && isAdding && !selectedCoords && (
+                    {isAdding && !selectedCoords && (
                         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] px-4 py-2 bg-primary-600 text-white rounded-full shadow-xl animate-bounce">
                             <p className="text-sm font-bold flex items-center gap-2">
                                 <MapPin className="w-4 h-4" />
@@ -218,7 +105,7 @@ export const Admin = () => {
                             </button>
                         </div>
 
-                        <form onSubmit={handleSubmit(onSubmitStall)} className="space-y-6">
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">Nombre del Puesto</label>
                                 <input {...register('name', { required: true })} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary-500 transition-all outline-none" placeholder="Ej. El Palacio de la Chola" />
