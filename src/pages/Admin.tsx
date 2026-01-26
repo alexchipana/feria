@@ -15,6 +15,7 @@ export const Admin = () => {
     const [sectorColor, setSectorColor] = useState('#3b82f6');
     const [selectedCoords, setSelectedCoords] = useState<{ lat: number, lng: number } | null>(null);
     const [uploading, setUploading] = useState(false);
+    const { register, handleSubmit, reset, setValue } = useForm();
     const [stalls, setStalls] = useState<Stall[]>([]);
     const [sectors, setSectors] = useState<Sector[]>([]);
 
