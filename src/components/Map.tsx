@@ -1,6 +1,8 @@
-import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, useMap, useMapEvents, ImageOverlay } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import '@geoman-io/leaflet-geoman-free';
+import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import { useStore } from '../store/useStore';
 import type { Stall, Sector } from '../types';
 import { Navigation } from 'lucide-react';
@@ -20,6 +22,9 @@ interface MapProps {
     sectors: Sector[];
     isAdmin?: boolean;
     onLocationSelect?: (lat: number, lng: number) => void;
+    isTracing?: boolean;
+    tracingOpacity?: number;
+    onSectorCreate?: (geojson: any) => void;
 }
 
 // Component to handle map clicks for admin
@@ -69,6 +74,54 @@ const MapController = () => {
     return null;
 };
 
+const GeomanController = ({ isTracing, onSectorCreate }: { isTracing?: boolean, onSectorCreate?: (geojson: any) => void }) => {
+    const map = useMap();
+
+    useEffect(() => {
+        if (isTracing) {
+            map.pm.addControls({
+                position: 'topleft',
+                drawCircle: false,
+                drawMarker: false,
+                drawCircleMarker: false,
+                drawRectangle: false,
+                drawPolygon: true,
+                drawLine: true,
+                editMode: true,
+                dragMode: true,
+                cutPolygon: false,
+                removalMode: true,
+            });
+
+            map.pm.setGlobalOptions({
+                snapDistance: 20,
+                allowSelfIntersection: false,
+                templineStyle: { color: '#3b82f6' },
+                hintlineStyle: { color: '#3b82f6', dashArray: [5, 5] }
+            });
+
+            const handleCreate = (e: any) => {
+                const layer = e.layer;
+                const geojson = layer.toGeoJSON();
+                if (onSectorCreate) {
+                    onSectorCreate(geojson);
+                }
+                // Optional: remove layer after creation if we wait for Supabase update to show it
+                // layer.remove();
+            };
+
+            map.on('pm:create', handleCreate);
+
+            return () => {
+                map.pm.removeControls();
+                map.off('pm:create', handleCreate);
+            };
+        }
+    }, [map, isTracing, onSectorCreate]);
+
+    return null;
+};
+
 const UserLocationMarker = () => {
     const { userLocation } = useStore();
     if (!userLocation) return null;
@@ -84,9 +137,16 @@ const UserLocationMarker = () => {
     return <Marker position={userLocation} icon={icon} />;
 };
 
-export const Map = ({ stalls, sectors, isAdmin, onLocationSelect }: MapProps) => {
+export const Map = ({ stalls, sectors, isAdmin, onLocationSelect, isTracing, tracingOpacity = 0.5, onSectorCreate }: MapProps) => {
     const { setSelectedStall } = useStore();
     const center: [number, number] = [-16.496, -68.185];
+
+    // Calculated bounds for 1.webp based on landmarks
+    // Approximated from Ceja to Ballivian/Chacaltaya area
+    const imageBounds: L.LatLngBoundsExpression = [
+        [-16.510, -68.195], // SW
+        [-16.485, -68.155]  // NE
+    ];
 
     return (
         <div className="relative w-full h-full">
@@ -102,6 +162,16 @@ export const Map = ({ stalls, sectors, isAdmin, onLocationSelect }: MapProps) =>
                 />
 
                 <MapController />
+                <GeomanController isTracing={isTracing} onSectorCreate={onSectorCreate} />
+
+                {isTracing && (
+                    <ImageOverlay
+                        url="/1.webp"
+                        bounds={imageBounds}
+                        opacity={tracingOpacity}
+                        zIndex={500}
+                    />
+                )}
 
                 {/* Sectors */}
                 {sectors.map((sector) => {
