@@ -14,19 +14,15 @@ export const Sidebar = ({ sectors }: SidebarProps) => {
         isSidebarOpen, setSidebarOpen
     } = useStore();
 
-    // Get unique categories from sectors or stalls and sort them alphabetically
-    const categories = Array.from(new Set(sectors.map(s => s.name.split(' - ').pop() || s.name))).sort((a, b) => a.localeCompare(b));
+    // Sort sectors alphabetically by name
+    const sortedSectors = [...sectors].sort((a, b) => a.name.localeCompare(b.name));
 
-    const handleCategoryClick = (cat: string | null) => {
-        setSelectedCategory(cat);
-
-        if (cat) {
-            // Find a sector that matches this category name
-            const matchingSector = sectors.find(s => s.name.includes(cat));
-            if (matchingSector) {
-                setSelectedSector(matchingSector);
-            }
+    const handleCategoryClick = (sector: Sector | null) => {
+        if (sector) {
+            setSelectedCategory(sector.name);
+            setSelectedSector(sector);
         } else {
+            setSelectedCategory(null);
             setSelectedSector(null);
         }
 
@@ -72,13 +68,20 @@ export const Sidebar = ({ sectors }: SidebarProps) => {
                             >
                                 Todos
                             </button>
-                            {categories.map(cat => (
+                            {sortedSectors.map(sector => (
                                 <button
-                                    key={cat}
-                                    onClick={() => handleCategoryClick(cat)}
-                                    className={`w-full text-left px-5 py-3 rounded-2xl text-[15px] font-bold transition-all duration-300 ${selectedCategory === cat ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30 translate-x-1' : 'text-slate-600 hover:bg-slate-50 hover:text-primary-600'}`}
+                                    key={sector.id}
+                                    onClick={() => handleCategoryClick(sector)}
+                                    className={`w-full text-left px-5 py-3 rounded-2xl text-[15px] font-bold transition-all duration-300 flex items-center gap-3 ${selectedCategory === sector.name ? 'bg-slate-100 translate-x-1' : 'hover:bg-slate-50'}`}
+                                    style={{ color: selectedCategory === sector.name ? sector.color : undefined }}
                                 >
-                                    {cat}
+                                    <span
+                                        className="w-3 h-3 rounded-full flex-shrink-0"
+                                        style={{ backgroundColor: sector.color }}
+                                    />
+                                    <span style={{ color: sector.color }}>
+                                        {sector.name}
+                                    </span>
                                 </button>
                             ))}
                         </div>

@@ -5,11 +5,9 @@ import { useStore } from './store/useStore';
 import { Sidebar } from './components/Sidebar';
 import { Map } from './components/Map';
 import { StallModal } from './components/StallModal';
-import { Map as MapIcon, LayoutGrid, Settings, Menu, MapPin as MapPinIcon, Search } from 'lucide-react';
-import { Admin } from './pages/Admin';
+import { Map as MapIcon, LayoutGrid, Menu, MapPin as MapPinIcon, Search } from 'lucide-react';
 
 function App() {
-    const [view, setView] = useState<'home' | 'admin'>('home');
     const [activeTab, setActiveTab] = useState<'map' | 'directory'>('map');
     const [sectors, setSectors] = useState<Sector[]>([]);
     const [stalls, setStalls] = useState<Stall[]>([]);
@@ -25,23 +23,6 @@ function App() {
         if (sectorsData) setSectors(sectorsData);
         if (stallsData) setStalls(stallsData);
     };
-
-    if (view === 'admin') {
-        return (
-            <div className="h-screen flex flex-col">
-                <div className="absolute top-4 left-4 z-[3000]">
-                    <button
-                        onClick={() => setView('home')}
-                        className="btn bg-white shadow-xl border border-slate-100 flex items-center gap-2"
-                    >
-                        <MapIcon className="w-5 h-5 text-primary-600" />
-                        Volver al Mapa
-                    </button>
-                </div>
-                <Admin />
-            </div>
-        );
-    }
 
     return (
         <div className="h-[100dvh] flex flex-col lg:flex-row bg-slate-50 overflow-hidden font-outfit">
@@ -126,15 +107,6 @@ function App() {
                         </div>
                     </div>
                 </div>
-
-                {/* Floating Admin Button */}
-                <button
-                    onClick={() => setView('admin')}
-                    className="absolute bottom-10 right-10 z-[1000] w-14 h-14 bg-white rounded-2xl shadow-xl border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary-600 transition-all hover:scale-110 active:scale-95 shadow-primary-500/10"
-                    title="Administración"
-                >
-                    <Settings className="w-6 h-6" />
-                </button>
             </main>
 
             <StallModal />
