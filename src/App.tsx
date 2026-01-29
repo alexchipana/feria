@@ -7,6 +7,7 @@ import { Map } from './components/Map';
 import { StallModal } from './components/StallModal';
 import { Map as MapIcon, LayoutGrid, Menu, MapPin as MapPinIcon, Search } from 'lucide-react';
 
+
 function App() {
     const [activeTab, setActiveTab] = useState<'map' | 'directory'>('map');
     const [sectors, setSectors] = useState<Sector[]>([]);

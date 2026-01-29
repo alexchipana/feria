@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, CircleMarker, LayerGroup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useStore } from '../store/useStore';
@@ -46,6 +46,10 @@ const MapController = () => {
                 coords = coordinates[0];
             } else if (type === 'LineString') {
                 coords = coordinates;
+            } else if (type === 'MultiPoint') {
+                coords = coordinates;
+            } else if (type === 'Point') {
+                coords = [coordinates];
             }
 
             if (coords.length > 0) {
@@ -140,6 +144,44 @@ export const Map = ({ stalls, sectors, isAdmin, onLocationSelect }: MapProps) =>
                             >
                                 <Popup>{sector.name}</Popup>
                             </Polyline>
+                        );
+                    }
+
+                    if (type === 'Point') {
+                        return (
+                            <CircleMarker
+                                key={sector.id}
+                                center={[coords[1], coords[0]]}
+                                pathOptions={{
+                                    color: sector.color,
+                                    fillColor: sector.color,
+                                    fillOpacity: 0.7
+                                }}
+                                radius={8}
+                            >
+                                <Popup>{sector.name}</Popup>
+                            </CircleMarker>
+                        );
+                    }
+
+                    if (type === 'MultiPoint') {
+                        return (
+                            <LayerGroup key={sector.id}>
+                                {coords.map((coord: any, idx: number) => (
+                                    <CircleMarker
+                                        key={`${sector.id}-${idx}`}
+                                        center={[coord[1], coord[0]]}
+                                        pathOptions={{
+                                            color: sector.color,
+                                            fillColor: sector.color,
+                                            fillOpacity: 0.7
+                                        }}
+                                        radius={6}
+                                    >
+                                        <Popup>{sector.name}</Popup>
+                                    </CircleMarker>
+                                ))}
+                            </LayerGroup>
                         );
                     }
 
