@@ -1,5 +1,6 @@
 import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, CircleMarker, LayerGroup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
+
 import 'leaflet/dist/leaflet.css';
 import { useStore } from '../store/useStore';
 import type { Stall, Sector } from '../types';
@@ -109,9 +110,52 @@ export const Map = ({ stalls, sectors, isAdmin, onLocationSelect }: MapProps) =>
 
                 {/* Sectors */}
                 {sectors.map((sector) => {
-                    if (!sector.geojson?.geometry?.coordinates) return null;
+                    const geojson = sector.geojson;
+                    if (!geojson) return null;
 
-                    const type = sector.geojson.geometry.type;
+                    if (geojson.type === 'FeatureCollection') {
+                        return (
+                            <LayerGroup key={sector.id}>
+                                {geojson.features.map((feature: any, idx: number) => {
+                                    const [lon, lat] = feature.geometry.coordinates;
+                                    const angle = feature.properties.angle || 0;
+
+                                    const stallIcon = L.divIcon({
+                                        className: '',
+                                        html: `<div style="
+                                            background-color: ${sector.color};
+                                            width: 10px;
+                                            height: 10px;
+                                            transform: rotate(${angle}deg);
+                                            border: 1px solid rgba(0,0,0,0.3);
+                                            border-radius: 1px;
+                                        "></div>`,
+                                        iconSize: [10, 10],
+                                        iconAnchor: [5, 5]
+                                    });
+
+                                    return (
+                                        <Marker
+                                            key={`${sector.id}-${idx}`}
+                                            position={[lat, lon]}
+                                            icon={stallIcon}
+                                        >
+                                            <Popup>
+                                                <div className="text-sm">
+                                                    <p className="font-bold">{sector.name}</p>
+                                                    <p className="text-xs text-gray-500">{feature.properties.street}</p>
+                                                </div>
+                                            </Popup>
+                                        </Marker>
+                                    );
+                                })}
+                            </LayerGroup>
+                        );
+                    }
+
+                    if (!geojson.geometry?.coordinates) return null;
+
+                    const type = geojson.geometry.type;
                     const coords = sector.geojson.geometry.coordinates;
 
                     if (type === 'Polygon') {
